@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Watch & Earn</title><style>
+body{margin:0;background:#0b1020;color:#f7f7ff;font:16px system-ui;padding:24px}main{max-width:520px;margin:auto}
+.card{background:#17213a;border:1px solid #34415f;border-radius:16px;padding:20px;margin:18px 0}
+h1{font-size:2.6rem;line-height:1.05}span{color:#b69cff}p{color:#b7c2d8}
+label{display:block;margin:12px 0 5px}input{width:100%;padding:12px;box-sizing:border-box;border-radius:9px;border:1px solid #44516e;background:#0b1326;color:white}
+button{padding:12px;border:0;border-radius:9px;background:#8b5cf6;color:white;font-weight:bold;margin:5px 4px 5px 0}button[type=submit]{width:100%;margin-top:16px}
+#message{color:#fbbf24;overflow-wrap:anywhere}.hidden{display:none}.note{background:#3b2c13;padding:12px;border-radius:10px;color:#ffe7b0;font-size:.9rem}
+</style></head><body><main>
+<strong>WATCH <span>&</span> EARN</strong><h1>Watch videos.<br><span>Earn rewards.</span></h1>
+<p>Member account portal</p><div class="note">Development version. Real rewards and M-PESA payouts are not enabled.</div>
+<section class="card" id="auth">
+<button id="signupTab">Create account</button><button id="loginTab">Log in</button>
+<form id="form"><div id="nameWrap"><label>Your name</label><input id="name" placeholder="Full name"></div>
+<label>Email</label><input id="email" type="email" required placeholder="you@example.com">
+<label>Password (at least 8 characters)</label><input id="password" type="password" minlength="8" required>
+<button type="submit" id="submit">Create my account</button></form><p id="message"></p></section>
+<section class="card hidden" id="member"><button id="logout" style="float:right">Log out</button><h2>Welcome!</h2><p id="welcome"></p><h2>KSh 0.00</h2><p>Demo balance only. No real rewards have been credited.</p></section>
+</main>
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+// Replace these two placeholders with the Project URL and public anon/publishable key.
+// Find them in Supabase: Project Settings → API. NEVER use the service_role key here.
+const URL='PASTE_SUPABASE_PROJECT_URL_HERE';
+const KEY='PASTE_PUBLIC_ANON_OR_PUBLISHABLE_KEY_HERE';
+const ready=URL.startsWith('https://')&&!URL.includes('PASTE_')&&!KEY.includes('PASTE_');
+const msg=document.querySelector('#message'), auth=document.querySelector('#auth'), member=document.querySelector('#member');
+let mode='signup', sb=null;
+function say(t){msg.textContent=t}
+function setMode(m){mode=m;document.querySelector('#nameWrap').classList.toggle('hidden',m==='login');document.querySelector('#submit').textContent=m==='login'?'Log in':'Create my account';say('')}
+document.querySelector('#signupTab').onclick=()=>setMode('signup');
+document.querySelector('#loginTab').onclick=()=>setMode('login');
+async function showUser(user){auth.classList.add('hidden');member.classList.remove('hidden');document.querySelector('#welcome').textContent=user.email||'You are signed in.'}
+document.querySelector('#form').onsubmit=async e=>{e.preventDefault();if(!ready||!sb){say('Setup needed: add your Supabase Project URL and public key in this file first.');return}
+const btn=document.querySelector('#submit');btn.disabled=true;
+try{const email=document.querySelector('#email').value.trim(),password=document.querySelector('#password').value;
+if(mode==='signup'){const name=document.querySelector('#name').value.trim();if(!name)throw Error('Enter your name.');
+const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:name}}});if(error)throw error;
+if(data.session&&data.user)await showUser(data.user);else say('Check your email for a confirmation link, then log in here.')}
+else{const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;await showUser(data.user)}
+}catch(err){say(err.message||'Please try again.')}finally{btn.disabled=false}};
+document.querySelector('#logout').onclick=async()=>{await sb.auth.signOut();member.classList.add('hidden');auth.classList.remove('hidden');setMode('login')};
+if(ready){sb=createClient(URL,KEY);const {data:{session}}=await sb.auth.getSession();if(session?.user)await showUser(session.user)}else say('Add your Supabase Project URL and public key before testing registration.');
+</script></body></html>
