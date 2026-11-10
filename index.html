@@ -22,8 +22,8 @@ button{padding:12px;border:0;border-radius:9px;background:#8b5cf6;color:white;fo
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 // Replace these two placeholders with the Project URL and public anon/publishable key.
 // Find them in Supabase: Project Settings → API. NEVER use the service_role key here.
-const URL='PASTE_SUPABASE_PROJECT_URL_HERE';
-const KEY='PASTE_PUBLIC_ANON_OR_PUBLISHABLE_KEY_HERE';
+const URL='https://sdopffaacvgdiflipyxz.supabase.co/rest/v1/
+const KEY='sb_publishable_qZAb_z9-7Z-G_sDkzO1NJg_looyE672
 const ready=URL.startsWith('https://')&&!URL.includes('PASTE_')&&!KEY.includes('PASTE_');
 const msg=document.querySelector('#message'), auth=document.querySelector('#auth'), member=document.querySelector('#member');
 let mode='signup', sb=null;
